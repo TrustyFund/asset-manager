@@ -4,8 +4,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const transactionWriter = require('./TransactionWriter');
 const Checker = require('./Checker');
-
-const fs = require('fs');
+const { Apis } = require('bitsharesjs-ws');
 
 async function processWork() {
   const checker = new Checker(config.trustyIssuerId, config.trustyIssuerBrainkey, config.trustyKYCId);
@@ -30,7 +29,15 @@ async function processWork() {
   host.post('/issue_asset', async (req, res) => {
     const { user, amount } = req.body;
     const result = await checker.checkUserExists(user);
-    console.log(result);
+    if (result) {
+      const [toAccount] = await Apis.instance().db_api().exec('get_objects', [[user]]);
+      const issued = await AssetManager.issueAsset(config.trustyIssuerId, toAccount.id, config.defaultIssueAssetId, amount, config.trustyIssuerBrainkey);
+      if(issued){
+        res.send(JSON.stringify({
+          result: 'OK'          
+        }))
+      }
+    }
   });
 
 

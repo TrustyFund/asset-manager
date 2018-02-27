@@ -51,10 +51,10 @@ function createAsset(
   });
 }
 
-function issueAsset(accountId, amount, assetId, privateKey) {
+async function issueAsset(issuerAccountId, issueToAccountId, amount, assetId, brainkey) {
   const issueJSON = {
-    issuer: accountId,
-    issue_to_account: accountId,
+    issuer: issuerAccountId,
+    issue_to_account: issueToAccountId,
     asset_to_issue: {
       amount,
       asset_id: assetId,
@@ -62,14 +62,12 @@ function issueAsset(accountId, amount, assetId, privateKey) {
   };
   const transaction = new TransactionBuilder();
   transaction.add_type_operation('asset_issue', issueJSON);
-  const pKey = PrivateKey.fromWif(privateKey);
-  transaction.set_required_fees().then(() => {
-    transaction.add_signer(pKey, pKey.toPublicKey().toPublicKeyString());
-    console.log('serialized transaction:', JSON.stringify(transaction.serialize()));
-    transaction.broadcast(() => {
-      console.log('issue uia transaction done');
-    });
-  });
+  const normalizedBrainkey = key.normalize_brainKey(brainkey);
+  const pKey = key.get_brainPrivateKey(normalizedBrainkey, 1);
+  await transaction.set_required_fees();
+  await transaction.add_signer(pKey, pKey.toPublicKey().toPublicKeyString());
+  const result = transaction.broadcast();
+  return result;
 }
 
 function burnAsset(accountId, amount, assetId, privateKey) {

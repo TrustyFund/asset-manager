@@ -29,11 +29,11 @@ module.exports = {
     maximum_force_settlement_volume: 2000,
     short_backing_asset: '1.3.0'
   },
-  serviceUserId: '1.2.512210', //hobb1t
-  trustyKYCId: '1.2.512210', //hobb1t
-  trustyIssuerId: '1.2.772147', //trusty-issuer
+  serviceUserId: '',
+  trustyKYCId: '',
+  trustyIssuerId: '',
   trustyKYCBrainkey: '',
   trustyIssuerBrainkey: '',
   defaultPort: 3000,
-  defaultIssueAssetId: '1.3.2'
+  defaultIssueAssetId: ''
 };

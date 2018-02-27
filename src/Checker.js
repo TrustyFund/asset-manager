@@ -12,12 +12,12 @@ class Checker {
 
   async checkUserExists(user) {
     const allHistory = await this.getAllHistory();
-    console.log(allHistory.length);
     const pass = allHistory.find((item) => this.checkIsKYC(item, user));
     return !!pass;
   }
 
   checkIsKYC(operation, userForCheck) {
+    console.log(userForCheck);
     let pass = false;
     const transfer = operation.op[1];
 
@@ -25,14 +25,11 @@ class Checker {
       return pass;
     }
 
-    let message = undefined;
+    let message;
     if (transfer.memo) {
-      try{
+      try {
         message = this.decryptMemo(transfer.memo);
-        console.log(message);
-      } catch(ex) {
-        console.log('ex:', ex);
-        return pass;
+      } catch (ex) {
       }
       try {
         const parsed = JSON.parse(message);
@@ -42,8 +39,7 @@ class Checker {
             pass = true;
           }
         }
-      } catch (ex) {
-        return pass;
+      } catch (ex) {     
       }
     }
     return pass;
@@ -52,7 +48,7 @@ class Checker {
   decryptMemo(memo) {
     return Aes.decrypt_with_checksum(
       this.privateKey,
-      memo.from,
+      memo.to,
       memo.nonce,
       memo.message
     ).toString('utf-8');

@@ -1,4 +1,3 @@
-const { PrivateKey } = require('bitsharesjs');
 const { TransactionHelper } = require('bitsharesjs');
 const { Aes } = require('bitsharesjs');
 const { TransactionBuilder } = require('bitsharesjs');
@@ -6,7 +5,7 @@ const { key } = require('bitsharesjs');
 const { Apis } = require('bitsharesjs-ws');
 const config = require('../config');
 
-async function sendUserToService(userName, bankAccount) {
+async function sendUserToService(userName, bankaccount) {
   const [fromAccount] = await Apis.instance().db_api().exec('get_objects', [[config.trustyKYCId]]);
   const [toAccount] = await Apis.instance().db_api().exec('get_objects', [[config.trustyIssuerId]]);
   const normalizedBrainkey = key.normalize_brainKey(config.trustyKYCBrainkey);
@@ -15,7 +14,7 @@ async function sendUserToService(userName, bankAccount) {
 
   let memo = {
     user: userName,
-    bankAccount
+    bankaccount
   };
   memo = JSON.stringify(memo);
 

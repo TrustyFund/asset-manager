@@ -7,7 +7,7 @@ const Checker = require('./Checker');
 const { Apis } = require('bitsharesjs-ws');
 
 async function processWork() {
-  const checker = new Checker(config.trustyIssuerId, config.trustyIssuerBrainkey, config.trustyKYCId);
+  const checker = new Checker(config.trustyIssuerId, config.trustyKYCBrainkey, config.trustyKYCId);
 
   const host = express();
   host.use(bodyParser.urlencoded({ extended: true }));
@@ -17,7 +17,6 @@ async function processWork() {
     res.setHeader('Content-Type', 'application/json');
     if ((user !== undefined) && (bankaccount !== undefined)) {
       const writeToBlockChain = await transactionWriter.sendUserToService(user, bankaccount);
-      console.log(writeToBlockChain);
       if (writeToBlockChain) {
         res.send(JSON.stringify({
           result: 'OK'
@@ -30,12 +29,12 @@ async function processWork() {
     const { user, amount } = req.body;
     const result = await checker.checkUserExists(user);
     if (result) {
-      const [toAccount] = await Apis.instance().db_api().exec('get_objects', [[user]]);
-      const issued = await AssetManager.issueAsset(config.trustyIssuerId, toAccount.id, config.defaultIssueAssetId, amount, config.trustyIssuerBrainkey);
-      if(issued){
+      const toAccount = await Apis.instance().db_api().exec('get_account_by_name', [user]);
+      const issued = await AssetManager.issueAsset(config.trustyIssuerId, toAccount.id, amount, config.defaultIssueAssetId, config.trustyIssuerBrainkey);
+      if (issued) {
         res.send(JSON.stringify({
-          result: 'OK'          
-        }))
+          result: 'OK'
+        }));
       }
     }
   });
@@ -44,37 +43,6 @@ async function processWork() {
   host.listen(config.defaultPort, () => {
     console.log('server is running');
   });
-
-  /*let description = {
-    main: 'just test description',
-    market: 'BTS',
-    shortName: 'TESTUIA',
-    visible: true
-  };
-
-  description = JSON.stringify(description);
-  const coreExchangeRate = {
-    base: {
-      amount: 1,
-      asset_id: '1.3.0'
-    },
-    quote: {
-      amount: 1,
-      asset_id: '1.3.1'
-    }
-  };
-
-  const symbol = 'TESTUIA';
-  const maxSupply = 1000000;
-  const precision = '4';
-  const maxMarketFee = 0;
-  const marketFeePercent = 0;
-  const isBitAsset = false;
-  const isPredictionMarket = false;
-  AssetManager.createAsset(
-    config.serviceUserId, symbol, precision, description, maxSupply,
-    marketFeePercent, maxMarketFee, coreExchangeRate, isBitAsset, isPredictionMarket, config.serviceUserPrivateKey
-  );*/
 }
 
 module.exports = processWork;
